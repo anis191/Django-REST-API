@@ -1,5 +1,13 @@
 from django.db import models
 
+"""
+Step to build an api:
+1st --> Create Model
+2nd --> Create Serializer
+3rd --> Define ViewSet
+4th --> Set Router
+"""
+
 # Create Category Model
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -28,3 +36,11 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+class Review(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE
+    )
+    name = models.CharField(max_length=255)
+    description = models.TextField(max_length=500)
+    date = models.DateField(auto_now_add=True)

@@ -56,3 +56,13 @@ class ProductSerializer(serializers.ModelSerializer):
         if price < 0:
             raise serializers.ValidationError("Price Can't be negative")
         return price
+    
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id','name','description']
+    
+    def create(self, validated_data):
+        product_id = self.context['product_id']
+        review = Review.objects.create(product_id=product_id, **validated_data)
+        return review
