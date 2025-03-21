@@ -11,11 +11,21 @@ from django.db.models import Count
 # from rest_framework.mixins import ListModelMixin, CreateModelMixin
 # from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet
+from django_filters.rest_framework import DjangoFilterBackend
+from product.filters import ProductFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
+# from rest_framework.pagination import PageNumberPagination
+from product.paginations import DefaultPagination
 
 #This view handel create/retrieve/update/destroy all perform:
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = ProductFilter
+    pagination_class = DefaultPagination
+    search_fields = ['name','description']
+    ordering_fields = ['price']
 
 #This view handel create/retrieve/update/destroy all perform:
 class CategoryViewSet(ModelViewSet):
