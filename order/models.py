@@ -1,9 +1,12 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 from users.models import *
 from product.models import *
+from uuid import uuid4
 
 # Create Cart Model
 class Cart(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -12,7 +15,7 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Cart if {self.user.username}"
+        return f"Cart if {self.user.first_name}"
 
 # Create CartItem Model
 class CartItem(models.Model):
@@ -25,7 +28,10 @@ class CartItem(models.Model):
         Product,
         on_delete=models.CASCADE
     )
-    quantity = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+
+    class Meta:
+        unique_together = [['cart','product']]
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
