@@ -16,6 +16,10 @@ from product.filters import ProductFilter
 from rest_framework.filters import SearchFilter, OrderingFilter
 # from rest_framework.pagination import PageNumberPagination
 from product.paginations import DefaultPagination
+# from rest_framework.permissions import IsAdminUser, AllowAny
+from api.permissions import IsAdminOrReadOnly
+from product.permissions import IsReviewAuthorOrReadOnly
+from rest_framework.permissions import DjangoModelPermissions
 
 #This view handel create/retrieve/update/destroy all perform:
 class ProductViewSet(ModelViewSet):
@@ -26,15 +30,26 @@ class ProductViewSet(ModelViewSet):
     pagination_class = DefaultPagination
     search_fields = ['name','description']
     ordering_fields = ['price']
+    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [DjangoModelPermissions]
+
+    """
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return[AllowAny()]
+        return[IsAdminUser()]
+    """
 
 #This view handel create/retrieve/update/destroy all perform:
 class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.annotate(product_count=Count('products')).all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 class ReviewViewSet(ModelViewSet):
     # queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [IsReviewAuthorOrReadOnly]
 
     def get_queryset(self):
         return Review.objects.filter(
@@ -42,4 +57,5 @@ class ReviewViewSet(ModelViewSet):
         )
 
     def get_serializer_context(self):
-        return {'product_id' : self.kwargs['product_pk']}
+        return {'product_id' : self.kwargs['product_pk'],
+                'user' : self.request.user}
