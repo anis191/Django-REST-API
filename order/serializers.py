@@ -58,9 +58,66 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ['id','user','items','total_price']
+        read_only_fields = ['user']
     
     def get_total_price(self, cart: Cart):
         list = []
         for item in cart.items.all():
             list.append(item.product.price * item.quantity)
         return sum(list)
+
+class CreateOrderSerializers(serializers.Serializer):
+    cart_id = serializers.UUIDField()
+
+    def validate_cart_id(self, cart_id):
+        if not Cart.objects.filter(pk=cart_id).exists():
+            raise serializers.ValidationError('No cart found with this id')
+        if not CartItem.objects.filter(cart_id=cart_id).exists():
+            raise serializers.ValidationError('Cart is empty')
+        return cart_id
+    
+    def create(self, validated_data):
+        user_id = self.context['user_id']
+        cart_id = validated_data['cart_id']
+        
+        cart = Cart.objects.get(pk=cart_id)
+        cart_items = cart.items.select_related('product').all()
+
+        total= []
+        for item in cart_items:
+            total.append(item.product.price * item.quantity)
+        total_price = sum(total)
+
+        order = Order.objects.create(
+            user_id=user_id, total_price=total_price
+        )
+
+        order_items = [
+            OrderItem(
+                order = order,
+                product = item.product,
+                quantity = item.quantity,
+                price = item.product.price,
+                total_price = (item.quantity * item.product.price)
+            )
+            for item in cart_items
+        ]
+        OrderItem.objects.bulk_create(order_items)
+
+        cart.delete()
+
+        return order
+    def to_representation(self, instance):
+        return OrderSerializer(instance).data
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = SimpleProductSerializer(read_only=True)
+    class Meta:
+        model = OrderItem
+        fields = ['id','product','quantity','price']
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+    class Meta:
+        model = Order
+        fields = ['id','user','status','total_price','created_at','items']
