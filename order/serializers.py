@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from order.models import *
 from product.models import Product
+from order.services import OrderServices
 
 class SimpleProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -80,6 +81,13 @@ class CreateOrderSerializers(serializers.Serializer):
         user_id = self.context['user_id']
         cart_id = validated_data['cart_id']
         
+        try:
+            order = OrderServices.create_order(user_id=user_id, cart_id=cart_id)
+            return order
+        except ValueError as error:
+            raise serializers.ValidationError(str(error))
+
+        """ [This comment part is just move in a new .py file named services.py]
         cart = Cart.objects.get(pk=cart_id)
         cart_items = cart.items.select_related('product').all()
 
@@ -107,8 +115,31 @@ class CreateOrderSerializers(serializers.Serializer):
         cart.delete()
 
         return order
+        """
     def to_representation(self, instance):
         return OrderSerializer(instance).data
+
+class UpdateOrderSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['status']
+    
+    def update(self, instance, validated_data):
+        user = self.context['user']
+        new_status = validated_data['status']
+
+        if new_status == Order.CANCELED:
+            return OrderServices.cancel_order(order=instance, user=user)
+        
+        if not user.is_staff:
+            raise serializers.ValidationError({'detail' : 'You are not allowed to update this order status'})
+        """
+        instance.status = new_status
+        instance.save()
+        return instance
+        [we replace this three line of code with a single line below]
+        """
+        return super().update(instance, validated_data)
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = SimpleProductSerializer(read_only=True)
