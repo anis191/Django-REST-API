@@ -97,10 +97,10 @@ class ProductImageViewSet(ModelViewSet):
 
     def get_queryset(self):
         return ProductImage.objects.filter(
-            product_id = self.kwargs['product_pk']
+            product_id = self.kwargs.get('product_pk')
         )
     def perform_create(self, serializer):
-        serializer.save(product_id = self.kwargs['product_pk'])
+        serializer.save(product_id = self.kwargs.get('product_pk'))
 
 #This view handel create/retrieve/update/destroy all perform:
 class CategoryViewSet(ModelViewSet):
@@ -115,9 +115,13 @@ class ReviewViewSet(ModelViewSet):
 
     def get_queryset(self):
         return Review.objects.filter(
-            product_id = self.kwargs['product_pk']
+            product_id = self.kwargs.get('product_pk')
         )
 
     def get_serializer_context(self):
+        ''' [We update this line with get() method for solve a error of swagger docs]
         return {'product_id' : self.kwargs['product_pk'],
                 'user' : self.request.user}
+        '''
+        return {'product_id' : self.kwargs.get('product_pk'),
+            'user' : self.request.user}
