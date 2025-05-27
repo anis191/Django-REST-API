@@ -58,6 +58,11 @@ class ProductSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Price Can't be negative")
         return price
 
+class ProductImageSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id','image']
+
 class SimpleUserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(
         method_name='get_current_user_name'
