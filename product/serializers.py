@@ -10,7 +10,7 @@ class CategorySerializer(serializers.Serializer):
     description = serializers.CharField()
 '''
 class CategorySerializer(serializers.ModelSerializer):
-    product_count = serializers.IntegerField(read_only=True)
+    product_count = serializers.IntegerField(read_only=True, help_text='Return the total number of product in this category')
 
     class Meta:
         model = Category
@@ -40,11 +40,17 @@ class ProductSerializer(serializers.Serializer):
         return round(price, 2)
 """
 
+class ProductImageSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id','image']
+
 class ProductSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializers(many=True, read_only=True)
     class Meta:
         model = Product
         # fields = '__all__' #For all model fields
-        fields = ["id","name","description","price","stock","category","after_discount"]
+        fields = ["id","name","description","price","stock","category","after_discount","images"]
     
     # Add extra fields(if we need):
     after_discount = serializers.SerializerMethodField(method_name='discount')
@@ -57,11 +63,6 @@ class ProductSerializer(serializers.ModelSerializer):
         if price < 0:
             raise serializers.ValidationError("Price Can't be negative")
         return price
-
-class ProductImageSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ['id','image']
 
 class SimpleUserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(

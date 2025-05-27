@@ -13,6 +13,7 @@ from product.paginations import DefaultPagination
 from api.permissions import IsAdminOrReadOnly
 from product.permissions import IsReviewAuthorOrReadOnly
 from rest_framework.permissions import DjangoModelPermissions
+from drf_yasg.utils import swagger_auto_schema
 
 #This view handel create/retrieve/update/destroy all perform:
 class ProductViewSet(ModelViewSet):
@@ -25,6 +26,62 @@ class ProductViewSet(ModelViewSet):
     ordering_fields = ['price']
     permission_classes = [IsAdminOrReadOnly]
     # permission_classes = [DjangoModelPermissions]
+
+    # Here we override  this actions only just show doc string on swagger api gaid
+    # List products
+    @swagger_auto_schema(
+        operation_summary='Browse products',
+        operation_description="""
+        Return a paginated list of all products.
+
+        - Accessible to all users.
+        - Supports filtering by query parameters.
+        - Supports full-text search on `name`, `description`, and `category`.
+        - Supports ordering by `price` and `updated_at`.
+        """
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    # Create product
+    @swagger_auto_schema(
+        operation_summary='Create a new product',
+        operation_description='Only authenticated admin users are allowed to create a new product.'
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    # Retrieve single product
+    @swagger_auto_schema(
+        operation_summary='Retrieve product details',
+        operation_description='Returns the details of a specific product by its ID.'
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    # Update product
+    @swagger_auto_schema(
+        operation_summary='Update a product',
+        operation_description='Fully update a product. Only authenticated admin users are allowed.'
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    # Partially update product
+    @swagger_auto_schema(
+        operation_summary='Partially update a product',
+        operation_description='Partially update fields of a product. Only authenticated admin users are allowed.'
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    # Delete product
+    @swagger_auto_schema(
+        operation_summary='Delete a product',
+        operation_description='Deletes a product by its ID. Only authenticated admin users are allowed.'
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
 
     """
     def get_permissions(self):
