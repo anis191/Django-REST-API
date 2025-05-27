@@ -4,6 +4,9 @@ from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyM
 from order.serializers import *
 from order.models import *
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from order.services import OrderServices
 
 class CartViewSet(CreateModelMixin, DestroyModelMixin, GenericViewSet, RetrieveModelMixin):
     # queryset = Cart.objects.all()
@@ -41,15 +44,38 @@ class OrderViewSet(ModelViewSet):
     # serializer_class = OrderSerializer
     # permission_classes = [IsAuthenticated]
 
+    # Here we implament a django action for cancel an order:
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        order = self.get_object()
+        OrderServices.cancel_order(order=order, user=request.user)
+        return Response({'status' : 'Order Canceled'})
+    
+    # Here we implament a django action for admin update an order status:
+    @action(detail=True, methods=['patch'])
+    def update_status(self, request, pk=None):
+        order = self.get_object()
+        serializer = UpdateOrderSerializers(
+            order, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'status' : 'Order status updated'})
+
     def get_permissions(self):
-        if self.request.method == 'DELETE':
+        # if self.request.method == 'DELETE':
+        if self.action in ['update_status', 'destroy']:
             return [IsAdminUser()]
         return[IsAuthenticated()]
 
     def get_serializer_class(self):
-        if self.request.method == 'POST':
+        if self.action == 'cancel':
+            return EmptySerializers
+        # if self.request.method == 'POST':
+        if self.action == 'create':
             return CreateOrderSerializers
-        elif self.request.method == 'PATCH':
+        # elif self.request.method == 'PATCH':
+        elif self.action == 'update_status':
             return UpdateOrderSerializers
         return OrderSerializer
 

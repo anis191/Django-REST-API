@@ -3,6 +3,9 @@ from order.models import *
 from product.models import Product
 from order.services import OrderServices
 
+class EmptySerializers(serializers.Serializer):
+    pass
+
 class SimpleProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
@@ -124,6 +127,7 @@ class UpdateOrderSerializers(serializers.ModelSerializer):
         model = Order
         fields = ['status']
     
+    """ ==> We replace this part of code/method with django "@action" on the OrderViewSet.
     def update(self, instance, validated_data):
         user = self.context['user']
         new_status = validated_data['status']
@@ -133,13 +137,14 @@ class UpdateOrderSerializers(serializers.ModelSerializer):
         
         if not user.is_staff:
             raise serializers.ValidationError({'detail' : 'You are not allowed to update this order status'})
-        """
+        '''
         instance.status = new_status
         instance.save()
         return instance
         [we replace this three line of code with a single line below]
-        """
+        '''
         return super().update(instance, validated_data)
+    """
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = SimpleProductSerializer(read_only=True)
@@ -152,3 +157,4 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id','user','status','total_price','created_at','items']
+
