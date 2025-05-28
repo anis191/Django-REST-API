@@ -41,6 +41,7 @@ class ProductSerializer(serializers.Serializer):
 """
 
 class ProductImageSerializers(serializers.ModelSerializer):
+    image = serializers.ImageField()
     class Meta:
         model = ProductImage
         fields = ['id','image']
