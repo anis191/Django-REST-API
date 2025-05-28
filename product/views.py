@@ -17,7 +17,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 #This view handel create/retrieve/update/destroy all perform:
 class ProductViewSet(ModelViewSet):
-    queryset = Product.objects.all()
+    # queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
@@ -26,6 +26,10 @@ class ProductViewSet(ModelViewSet):
     ordering_fields = ['price']
     permission_classes = [IsAdminOrReadOnly]
     # permission_classes = [DjangoModelPermissions]
+
+    def get_queryset(self):
+        return Product.objects.prefetch_related('images').all()
+    '''Note: prefetch_related() is used for reverse relationships or many-to-many'''
 
     # Here we override  this actions only just show doc string on swagger api gaid
     # List products

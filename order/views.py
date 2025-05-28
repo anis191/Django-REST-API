@@ -22,7 +22,7 @@ class CartViewSet(CreateModelMixin, DestroyModelMixin, GenericViewSet, RetrieveM
             return Cart.objects.none()
         return Cart.objects.filter(
             user = self.request.user
-        )
+        ).prefetch_related('items__product')
 
 class CartItemViewSet(ModelViewSet):
     http_method_names = ['get','post','patch','delete']
