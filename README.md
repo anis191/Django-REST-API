@@ -6,6 +6,12 @@
 
 A robust RESTful API for an eCommerce platform built with Django REST Framework. PhiMart provides comprehensive endpoints to manage users, products, shopping carts, orders, and more, following modern API design practices.
 
+## 🌐 Live Deployment
+
+- 🔗 **Base URL** – [https://phimart-ecommerce-wheat.vercel.app/](https://phimart-ecommerce-wheat.vercel.app/)
+- 🔗 **API Root** – [https://phimart-ecommerce-wheat.vercel.app/api/v1/](https://phimart-ecommerce-wheat.vercel.app/api/v1/)
+
+
 ## 🚀 Key Features
 - **JWT Authentication** (Token-Based Security)
 - **User Management**: Registration, Login, and Profile Management
@@ -27,9 +33,9 @@ A robust RESTful API for an eCommerce platform built with Django REST Framework.
 - **Dependencies**: See [requirements.txt](requirements.txt)
 
 ## 📚 API Documentation
-Explore endpoints interactively *(Localhost only)*:
-- **Swagger UI**: http://127.0.0.1:8000/swagger/
-- **ReDoc**: http://127.0.0.1:8000/redoc/
+Explore the live interactive API documentation:
+- **Swagger UI**: https://phimart-ecommerce-wheat.vercel.app/swagger/
+- **ReDoc**: https://phimart-ecommerce-wheat.vercel.app/redoc/
 
 ## 🔧 Installation & Local Setup
 
