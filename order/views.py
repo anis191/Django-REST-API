@@ -75,9 +75,9 @@ class OrderViewSet(ModelViewSet):
 
     def get_permissions(self):
         # if self.request.method == 'DELETE':
-        if self.action in ['update_status', 'destroy']:
+        if self.action in ['update_status', 'destroy','partial_update']:
             return [IsAdminUser()]
-        return[IsAuthenticated()]
+        return [IsAuthenticated()]
 
     def get_serializer_class(self):
         if self.action == 'cancel':
@@ -86,7 +86,8 @@ class OrderViewSet(ModelViewSet):
         if self.action == 'create':
             return CreateOrderSerializers
         # elif self.request.method == 'PATCH':
-        elif self.action == 'update_status':
+        # elif self.action == 'update_status':
+        elif self.action in ['update_status','partial_update']:
             return UpdateOrderSerializers
         return OrderSerializer
 
