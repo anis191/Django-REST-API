@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from order.serializers import *
@@ -10,6 +10,7 @@ from rest_framework import status
 from order.services import OrderServices
 from rest_framework.decorators import api_view
 from sslcommerz_lib import SSLCOMMERZ 
+from django.conf import settings as main_settings
 
 class CartViewSet(CreateModelMixin, DestroyModelMixin, GenericViewSet, RetrieveModelMixin):
     # queryset = Cart.objects.all()
@@ -132,9 +133,9 @@ def initiate_payment(request):
     post_body['total_amount'] = amount
     post_body['currency'] = "BDT"
     post_body['tran_id'] = f"txn_{order_id}"
-    post_body['success_url'] = "http://localhost:5173/dashboard/payment/success/"
-    post_body['fail_url'] = "http://localhost:5173/dashboard/payment/fail/"
-    post_body['cancel_url'] = "http://localhost:5173/dashboard/orders/"
+    post_body['success_url'] = f"{main_settings.BACKEND_URL}/api/v1/payment/success/"
+    post_body['fail_url'] = f"{main_settings.BACKEND_URL}/api/v1/payment/fail/"
+    post_body['cancel_url'] = f"{main_settings.BACKEND_URL}/api/v1/payment/cancel/"
     post_body['emi_option'] = 0
     post_body['cus_name'] = f"{user.first_name} {user.last_name}"
     post_body['cus_email'] = user.email
@@ -154,3 +155,18 @@ def initiate_payment(request):
         return Response({"payment_url" : response['GatewayPageURL']})
     return Response({"error" : "Payment initiation failed"}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+def payment_success(request):
+    order_id = request.data.get("tran_id").split('_')[1]
+    order = Order.objects.get(id=order_id)
+    order.status = "Ready To Ship"
+    order.save()
+    return redirect(f"{main_settings.FRONTEND_URL}/dashboard/orders/")
+
+@api_view(['POST'])
+def payment_cencel(request):
+    return redirect(f"{main_settings.FRONTEND_URL}/dashboard/orders/")
+
+@api_view(['POST'])
+def payment_fail(request):
+    return redirect(f"{main_settings.FRONTEND_URL}/dashboard/orders/")
