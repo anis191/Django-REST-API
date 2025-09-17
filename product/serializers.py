@@ -11,10 +11,10 @@ class CategorySerializer(serializers.Serializer):
 '''
 class CategorySerializer(serializers.ModelSerializer):
     product_count = serializers.IntegerField(read_only=True, help_text='Return the total number of product in this category')
-
+    image = serializers.ImageField()
     class Meta:
         model = Category
-        fields = ["id","name","description","product_count"]
+        fields = ["id","name","description","image","product_count"]
 
     # product_count = serializers.IntegerField()
 
